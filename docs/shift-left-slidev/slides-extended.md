@@ -139,7 +139,7 @@ transition: slide-up
 
 ---
 
-# Unit Test Permission Flows
+# Permission Flows
 
 Don't check the system! Tests cannot interact with system prompts.
 
@@ -160,8 +160,319 @@ shadowApp.denyPermissions(Manifest.permission.ACCESS_FINE_LOCATION)
 
 ---
 
-# Unit Test Lifecycle Side Effects
+# Create our own ActivityResultRegistry
+
+Receive the permission requests, return the results
+
+```kotlin {1,5,12|2,3|*}
+class PermissionPromptRegistry : ActivityResultRegistry(),
+    ActivityResultRegistryOwner {
+    override fun getActivityResultRegistry() = this
+
+    override fun <I, O> onLaunch(
+        requestCode: Int,
+        contract: ActivityResultContract<I, O>,
+        input: I,
+        options: ActivityOptionsCompat?
+    ) {
+        //process permission request
+        dispatchResult(requestCode, result)
+    }
+}
+```
+
+---
+
+# Permission Unit Testing: Setup
+
+```kotlin {1,3,4|*}
+val registry = PermissionPromptRegistry()
+composeTestRule.setContent {
+    CompositionLocalProvider(
+        LocalActivityResultRegistryOwner provides registry
+    ) {
+        AwaTheme {
+            LocationPermissionScreen(onBackClick = {})
+        }
+    }
+}
+```
+
+---
+
+# Screen Unit Testing: Setup
+
+JUnit starting from the `Screen` composable
+
+```kotlin {1|3-4|9|10-15|*}
+@RunWith(RobolectricTestRunner::class)
+class FavoritesScreenTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun `given no favorites, screen displays empty state and action buttons`() {
+        var lambdaCalled = false
+        composeTestRule.setContent {
+            AwaTheme {
+                FavoritesScreen(
+                    favorites = emptyList(),
+                    onAddLocationClick = { lambdaCalled = true },
+                    isLoadingLocation = false,
+                    onAddCurrentLocationClick = {},
+                    onLocationClick = {},
+                    onRemoveFavorite = {},
+                )
+            }
+        }
+    }
+}
+```
+
+---
+
+# Screen Unit Testing - Verification
+
+What can be verified on a `Screen` with a given state?
+
+```kotlin {1|2|4,7-8|10|11-12}
+composeTestRule.onNodeWithText("No Favorites Added")
+    .assertIsDisplayed()
+
+val addButton = composeTestRule.onNodeWithTag("favorite:add_button")
+addButton.assertIsDisplayed()
+    .assertIsEnabled()
+    .assertHasClickAction()
+    .assert(hasTraversalIndex(1f))
+
+addButton.performClick()
+// onAddLocationClick = { lambdaCalled = true },
+assertTrue(lambdaCalled)
+
+```
+
+---
+transition: fade
+---
+# Screen Unit Testing: Verdict
+
+- basic state verification, accessibility + traversal index
+- one step above screenshot testing
+- no transitions or state modification
+- lambda call check
+- ~ previews
+- Litmus state check
+
+---
+transition: slide-up
+---
+# Screen Unit Testing: Verdict
+
+- basic state verification, accessibility + traversal index
+- one step above screenshot testing
+- no transitions or state modification
+- lambda call check
+- ~ previews
+- Litmus state check
+
+<div v-click.scale.fade class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 pointer-events-none z-20 border-8 border-red-600/60 text-red-600/70 text-6xl font-black uppercase tracking-widest px-8 py-4 rounded-xl shadow-2xl backdrop-blur-sm select-none">
+  Underwhelming!
+</div>
+
+---
+
+# Change the System Under Test?
+
+Move the test higher, at the `Route` composable
+
+```kotlin{2,4,7}
+@Composable
+fun FavoritesRoute(
+    modifier: Modifier = Modifier,
+    viewModel: FavoritesViewModel = hiltViewModel()
+) {
+    val favorites by viewModel.favoritesState.collectAsStateWithLifecycle()
+    FavoritesScreen(
+        favorites = favorites,
+        onAddLocationClick = viewModel::onAddLocationClick,
+        onAddCurrentLocationClick = viewModel::addCurrentLocationToFavorites,
+        onLocationClick = viewModel::onLocationClick,
+        onRemoveFavorite = viewModel::removeFavorite,
+        modifier = modifier
+    )
+}
+```
+
+---
+
+# Route Unit Testing: Setup
+
+More setup required: all `ViewModel` dependencies, but same compose rule
+
+```kotlin {3-8|10-15|}
+@Test
+fun `given location is removed, location is not shown`() = runTest {
+        val viewModel = FavoritesViewModel(
+            favoritesRepository = fakeFavoritesRepo,
+            weatherRepository = fakeWeatherRepo,
+            locationTracker = fakeLocationTracker,
+            navigator = navigator
+        )
+
+        composeTestRule.setContent {
+            AwaTheme {
+                FavoritesRoute(viewModel = viewModel)
+            }
+        }
+    }
+```
+
+---
+transition: fade
+---
+
+# Route Unit Testing: Verification
+
+Can verify state transition in UI, with real `ViewModel` and fake data sources
+
+```kotlin{1-2|4-5}
+composeTestRule.onNodeWithContentDescription("Remove Favorite")
+    .performClick()
+
+composeTestRule.onNodeWithText("Berlin").assertDoesNotExist()
+composeTestRule.onNodeWithText("No Favorites Added").assertIsDisplayed()
+```
+
+---
+
+# Route Unit Testing: Verification
+
+Can verify state transition in UI, with real `ViewModel` and fake data sources
+
+```
+composeTestRule.onNodeWithContentDescription("Remove Favorite")
+    .performClick()
+
+composeTestRule.onNodeWithText("Berlin").assertDoesNotExist()
+composeTestRule.onNodeWithText("No Favorites Added").assertIsDisplayed()
+```
+
+<div v-click.scale.fade class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-12 pointer-events-none z-20 text-red-600/70 text-6xl font-black uppercase tracking-widest px-8 py-4 rounded-xl shadow-2xl select-none">
+  <img src="./media/img.png" alt="It's something!" />
+</div>
+
+---
+
+# Route Unit Testing: Summary
+
+- **More** fakes/doubles/mocks involved
+    - Maybe Hilt
+- **Can cover**
+    - state modification
+    - some navigation state checks (sans UI)
+
+---
+
+# Change the system under test... again
+
+Move the test even higher, at the composable holding our `NavDisplay`
+
+* Even more fakes
+    * Get `Hilt` involved
+
+- Can check against more than one screens
+- State transitions
+- Navigation state changes
+- Navigation with UI
+
+---
+
+# App Unit Testing: Setup
+
+All about Hilt
+
+```kotlin {1,3,6-7,12-15}
+@HiltAndroidTest
+@RunWith(RobolectricTestRunner::class)
+@Config(application = HiltTestApplication::class)
+class AwaAppTest {
+
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+    }
+}
+```
+
+<arrow v-click="1" x1="450" y1="220" x2="350" y2="290" color="#ef4444" width="3" arrowSize="1" />
+
+<arrow v-click="1" x1="450" y1="440" x2="350" y2="510" color="#ef4444" width="3" arrowSize="1" />
+
+---
+
+# App Unit Testing: Setup
+
+Different rule!
+
+```kotlin {9-10}
+@HiltAndroidTest
+@RunWith(RobolectricTestRunner::class)
+@Config(application = HiltTestApplication::class)
+class AwaAppTest {
+
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+    }
+}
+```
+
+---
+
+# App Unit Testing: Summary
+
+* Setup: **everything**
+* Can cover: **everything**
+    * User flows across multiple screens
+    * UI navigation checks
+    * Fake data sources
+
+---
+
+# Side quest: Unit Test Lifecycle Side Effects
+
 We can provide our own `LifecycleOwner` for our tests.
+
+```kotlin
+private class TestLifecycleOwner(
+    initialState: Lifecycle.State = Lifecycle.State.INITIALIZED
+) : LifecycleOwner {
+    override val lifecycle: Lifecycle
+        field = LifecycleRegistry(this).apply {
+            currentState = initialState
+        }
+
+    fun handleLifecycleEvent(event: Lifecycle.Event) {
+        lifecycle.handleLifecycleEvent(event)
+    }
+}
+```
+
+---
+
+# Lifecycle Side Effects Unit Testing: Setup
 
 ```kotlin{5,11}
 val lifecycleOwner = 
@@ -174,16 +485,67 @@ composeTestRule.setContent {
         }
     }
 }
-lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
-lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_START)
 lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 ```
 
 ---
 
-# Unit Test Deep Links
+# Lifecycle Side Effects Unit Testing: Verification
 
-Using `ActivityScenario.launch<MainActivity>`:
+```kotlin{1|3-4|1,6-7|9-10|}
+composeTestRule.onNodeWithText("21.5°C").assertIsDisplayed()
+
+fakeWeatherRepo.weatherResult = 
+Result.success(fakeWeather.copy(currentTemperature = 28.0))
+
+lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+composeTestRule.onNodeWithText("21.5°C").assertIsDisplayed()
+
+lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
+composeTestRule.onNodeWithText("28.0°C").assertIsDisplayed()
+```
+
+---
+
+# Side Quest: Unit Test Deep Links
+
+Use `ActivityScenario` so that we can:
+
+- **Launch** an Activity in a realistic environment.
+- **Drive Lifecycle States** (`CREATED`, `STARTED`, `RESUMED`, `DESTROYED`).
+- **Trigger Configuration Changes** (e.g. screen rotation / recreation via `.recreate()`).
+- **Safely Access the Activity Instance** on the main thread via `.onActivity { activity -> ... }`. 
+---
+
+# Unit Test Deep Links: Setup
+Use `createEmptyComposeRule()`
+
+```kotlin {1,3,6-7,12-15}
+@HiltAndroidTest
+@RunWith(RobolectricTestRunner::class)
+@Config(application = HiltTestApplication::class)
+class DeepLinkNavigationTest {
+
+    @get:Rule(order = 0)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 1)
+    val composeTestRule = createEmptyComposeRule()
+
+    @Before
+    fun setUp() {
+        hiltRule.inject()
+    }
+}
+```
+
+<arrow v-click="1" x1="450" y1="220" x2="350" y2="290" color="#ef4444" width="3" arrowSize="1" />
+
+<arrow v-click="1" x1="450" y1="440" x2="350" y2="510" color="#ef4444" width="3" arrowSize="1" />
+
+---
+
+# Unit Test Deep Links: Verification
 
 ```kotlin {1-6|7|8-9}
 val deepLinkIntent = Intent(
@@ -200,7 +562,7 @@ ActivityScenario.launch<MainActivity>(deepLinkIntent).use {
 
 ---
 
-# ComposeContentTestRule
+# createComposeRule ()
 
 | Feature / Goal                           | `createComposeRule()`                          |
 |:-----------------------------------------|:-----------------------------------------------|
@@ -213,7 +575,7 @@ ActivityScenario.launch<MainActivity>(deepLinkIntent).use {
 
 ---
 
-# AndroidComposeTestRule
+# createAndroidComposeRule ()
 
 | Feature / Goal                           | `createAndroidComposeRule<MainActivity>()`   | 
 |:-----------------------------------------|:---------------------------------------------|
@@ -226,7 +588,7 @@ ActivityScenario.launch<MainActivity>(deepLinkIntent).use {
 
 ---
 
-# ActivityScenario
+# ActivityScenario.launch (Intent)
 
 | Feature / Goal                           | Direct `ActivityScenario.launch(Intent)`           |
 |:-----------------------------------------|:---------------------------------------------------|
