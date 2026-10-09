@@ -976,7 +976,7 @@ If what you care about are:
 
 ## Then prioritize the information for people, rather than machines.
 
----
+--- 
 transition: zoom
 ---
 
@@ -984,6 +984,11 @@ transition: zoom
 
 * https://developer.android.com/static/develop/ui/compose/images/compose-testing-cheatsheet.pdf
 * https://robolectric.org/getting-started
+* https://github.com/IuliaSTANA/unit-test-ui
+
+<div class="absolute bottom-12 right-12">
+  <img src="./media/repo_qr.png" class="h-44 object-contain rounded-xl shadow-lg border border-gray-500/20" />
+</div>
 
 --- 
 layout: image-right
