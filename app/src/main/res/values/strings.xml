@@ -1,0 +1,78 @@
+<resources>
+    <string name="app_name">Another Weather App</string>
+
+    <!-- Navigation & Titles -->
+    <string name="favorites_title">Favorite Locations</string>
+    <string name="favorites_empty_title">No Favorites Added</string>
+    <string name="favorites_empty_subtitle">Add a Droidcon city or your current location to track weather easily.</string>
+    <string name="droidcon_locations_title">Droidcon Locations</string>
+    <string name="current_location_name">Current Location</string>
+
+    <!-- Buttons -->
+    <string name="btn_add_favorite_location">Add New Location</string>
+    <string name="btn_add_current_location">Add Current Location</string>
+    <string name="btn_grant_permission">Grant Permission</string>
+    <string name="btn_use_default_location">Use Berlin Default</string>
+    <string name="btn_add_to_favorites">Add to Favorites</string>
+    <string name="btn_remove_from_favorites">Remove from Favorites</string>
+    <string name="btn_retry">Retry</string>
+    <string name="btn_refresh_weather">Refresh Weather</string>
+    <string name="btn_back">Back</string>
+
+    <!-- Weather Details & Metrics -->
+    <string name="weather_fetching_data">Fetching weather data…</string>
+    <string name="weather_location_permission_needed">Location permission is required to fetch weather for your current location.</string>
+    <string name="weather_humidity">Humidity</string>
+    <string name="weather_wind_speed">Wind Speed</string>
+    <string name="weather_hourly_forecast">24-Hour Forecast</string>
+    <string name="weather_current_location">Current Location</string>
+
+    <!-- Permission Screen -->
+    <string name="permission_title">📍 Location Access Needed</string>
+    <string name="permission_description">AWA needs access to your location to fetch current local weather data from Open-Meteo.</string>
+    <string name="location_permission_rationale_title">Location Permission &amp; High Accuracy Rationale</string>
+    <string name="permission_status_header">Permission Status:</string>
+    <string name="permission_status_granted">GRANTED</string>
+    <string name="permission_status_denied">DENIED</string>
+    <string name="permission_status_coarse">• Foreground Coarse (Approximate): %1$s</string>
+    <string name="permission_status_fine">• Foreground Fine (Precise / High Accuracy): %1$s</string>
+    <string name="permission_status_background">• Background Location (\'Allow all the time\'): %1$s</string>
+
+    <string name="btn_foreground_precise_granted">Foreground Precise Granted</string>
+    <string name="btn_request_foreground_location">1. Request High Accuracy Foreground Location</string>
+    <string name="btn_upgrade_high_accuracy">Upgrade to High Accuracy (Precise)</string>
+    <string name="btn_background_location_granted">Background Location Granted</string>
+    <string name="btn_request_background_location">2. Request Background Location</string>
+    <string name="btn_open_app_settings">Open App Settings</string>
+
+    <!-- Location Permission Dialogs -->
+    <string name="dialog_foreground_rationale_title">Location Access Needed</string>
+    <string name="dialog_foreground_rationale_message">This app requires location access to discover nearby services and show your exact position on the map. Without this permission, location-based features cannot function.</string>
+    <string name="btn_not_now">Not Now</string>
+
+    <string name="dialog_high_accuracy_rationale_title">High Accuracy Required</string>
+    <string name="dialog_high_accuracy_rationale_message">You have granted Approximate location. To provide accurate navigation, geofencing, and precise real-time tracking, high-accuracy (Precise) location is required. Please allow Precise location access for the best experience.</string>
+    <string name="btn_enable_high_accuracy">Enable High Accuracy</string>
+    <string name="btn_keep_approximate">Keep Approximate</string>
+
+    <string name="dialog_background_rationale_title">Background Location &amp; High Accuracy Rationale</string>
+    <string name="dialog_background_rationale_message">Why this app needs Background Location:\n\n• Real-Time Monitoring &amp; Alerts: The app continuously monitors location in the background to send critical proximity alerts and geofence events even when closed or not in use.\n• High Accuracy Requirement: Background tracking relies on precise coordinates to ensure geofences trigger accurately without false alarms.\n\nOn the next screen, please select \'Allow all the time\' (or enable Location in Settings) so the app can function seamlessly in the background.</string>
+    <string name="btn_proceed_to_settings">Proceed to Settings / Prompt</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <string name="dialog_settings_redirect_title">Permission Required in Settings</string>
+    <string name="dialog_settings_redirect_message">%1$s\n\nThe system permission prompt will no longer be shown automatically. You can enable this permission manually in App Settings under \'Permissions\' -&gt; \'Location\'.</string>
+    <string name="location_permanently_denied_message">Foreground location permission is permanently denied. Please enable location permissions in App Settings.</string>
+    <string name="high_accuracy_disabled_message">High accuracy (precise) location is disabled. Please enable precise location in App Settings.</string>
+    <string name="background_location_disabled_message">Background location permission is disabled. To allow features to run in the background, select \'Allow all the time\' in App Settings.</string>
+    <string name="btn_open_settings">Open Settings</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_favorite_icon">Favorite</string>
+    <string name="cd_not_favorite_icon">Not Favorite</string>
+    <string name="cd_delete_favorite">Remove Favorite</string>
+    <string name="cd_back_button">Navigate Back</string>
+
+    <!-- Errors -->
+    <string name="error_failed_to_load">Failed to load weather data</string>
+</resources>

@@ -1,0 +1,14 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+/.kotlin
+app/build
+/build
+test-libraries/compose-test-dsl/build
+
+.DS_Store
+/captures
+.externalNativeBuild
+.cxx
+local.properties

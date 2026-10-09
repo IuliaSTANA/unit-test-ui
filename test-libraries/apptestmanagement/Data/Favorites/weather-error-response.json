@@ -1,0 +1,5 @@
+{
+  "reason": "Failed to fetch weather: Internal Server Error",
+  "error": true,
+  "code": 500
+}

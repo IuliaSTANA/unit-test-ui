@@ -1,0 +1,11 @@
+{
+  "latitude": 52.52,
+  "longitude": 13.405,
+  "current": {
+    "time": "2025-02-23T12:00",
+    "temperature_2m": 21.5,
+    "relative_humidity_2m": 50,
+    "weather_code": 0,
+    "wind_speed_10m": 10.0
+  }
+}
